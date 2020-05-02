@@ -4,6 +4,16 @@ This simple Python 3 script does redirect all entries in your `sources.list` and
 It redirects all entries cached by the approx server
 but does not change uncached repositories.
 
+## Repository clones
+
+The original repository will be stored on [GitHub](https://github.com/Zocker1999NET/approx-redirect).
+You can use the original reopsitory if you want to use GitHub.
+Also issues and pull requests will be collected there for convenience.
+
+This repository will be cloned to my own server.
+You can use the [clone](https://git.banananet.work/zocker/approx-redirect) instead of this repository
+if you want to avoid use GitHub.
+
 ## Features
 
 - Looks up cacheable repositories
