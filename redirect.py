@@ -125,11 +125,9 @@ def check_line(line, mapping):
             else:
                 new_line = old_pattern.sub(new_url, line)
             verb(f"-> {new_line} # {new_url}{old_suffix}", add=-3)
-            line = new_line
-            break
-    else:
-        verb(f"= {line}", add=-2)
-    return line
+            return new_line
+    verb(f"= {line}", add=-2)
+    return None
 
 def checkFile(source_file, mapping):
     global write_mode
@@ -145,7 +143,10 @@ def checkFile(source_file, mapping):
             for line in f:
                 line = line[:-1] # Remove newline character
                 if isDebLine(line):
-                    line = check_line(line, mapping)
+                    new_line = check_line(line, mapping)
+                    if new_line:
+                        changed = True
+                        line = new_line
                 if write_mode:
                     newFile.write(line + "\n")
         if write_mode and changed:
