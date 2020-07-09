@@ -24,6 +24,7 @@ mapRegex = re.compile(r"^<tr><td><a href=\"(?P<new>[^\"]+)\">[^<>]+</a></td><td>
 allProtoRegex = re.compile(r"^[a-z+]+:/*(?!/)")
 protoReplaceRegex = re.compile(r"^https?://")
 lineReplaceRegex = re.compile(r"^\s*deb(-src)? ")
+lineUrlRegex = re.compile(r"(?<=\s)[a-z+]+:/*(?!/)\S+(?!\S)")
 
 ## Code
 
@@ -86,7 +87,7 @@ def url_to_regex(url, multi_mapping=multi_mapping):
         if not is_multi_mapped:
             url_pattern = re.escape(url)
         # Prefix protocol again
-        return r"https?://" + url_pattern + r"/?"
+        return r"https?://" + url_pattern
     else:
         return re.escape(url)
 
@@ -96,9 +97,41 @@ def modifyMap(d):
 def isDebLine(line):
     return lineReplaceRegex.search(line) is not None
 
-def checkFile(source_file, mapping):
+def check_line(line, mapping):
     global mirror_mode
     global mirror_path
+    global write_mode
+    for old_pattern, new_url in mapping.items():
+        old_match = old_pattern.search(line)
+        if old_match:
+            changed = True
+            verb(f"{line}")
+            if mirror_mode:
+                old_prefix = old_match.group(0)
+                old_url_match = lineUrlRegex.search(line)
+                if not old_url_match:
+                    raise Exception(f"URL '{old_prefix}' not found in line '{line}', report this to the developer")
+                old_url = old_url_match.group(0)
+                old_suffix = old_url[len(old_prefix):]
+                if (old_prefix + old_suffix) != old_url:
+                    raise Exception(f"URL '{old_prefix}' not matching in line '{line}', report this to the developer")
+                mirror_file = mirror_path / (hashlib.sha256(old_url.encode('utf-8')).hexdigest() + ".lst")
+                if write_mode:
+                    if not mirror_path.exists():
+                        mirror_path.mkdir()
+                    if not mirror_file.exists():
+                        mirror_file.write_text(f"{new_url}{old_suffix} priority:1\n{old_url} priority:9\n")
+                new_line = lineUrlRegex.sub('mirror+file:' + str(mirror_file.resolve()), line)
+            else:
+                new_line = old_pattern.sub(new_url, line)
+            verb(f"-> {new_line} # {new_url}{old_suffix}", add=-3)
+            line = new_line
+            break
+    else:
+        verb(f"= {line}", add=-2)
+    return line
+
+def checkFile(source_file, mapping):
     global write_mode
     verb(("Run replacements on" if write_mode else "Check") + f" {source_file}:")
     with verbLevelContext():
@@ -112,28 +145,7 @@ def checkFile(source_file, mapping):
             for line in f:
                 line = line[:-1] # Remove newline character
                 if isDebLine(line):
-                    for old_pattern, new_url in mapping.items():
-                        old_match = old_pattern.search(line)
-                        if old_match:
-                            changed = True
-                            old_url = old_match.group(0)
-                            verb(f"{line}")
-                            if mirror_mode:
-                                mirror_file = mirror_path / (hashlib.sha256(old_pattern.pattern.encode('utf-8')).hexdigest() + ".lst")
-                                new_line = old_pattern.sub('mirror+file:' + str(mirror_file.resolve()), line)
-                                if write_mode:
-                                    if not mirror_path.exists():
-                                        mirror_path.mkdir()
-                                    if not mirror_file.exists():
-                                        mirror_file.write_text(f"{new_url} priority:1")
-                                        mirror_file.write_text(f"{old_url} priority:9")
-                            else:
-                                new_line = old_pattern.sub(new_url, line)
-                            verb(f"-> {new_line} # {new_url}", add=-3)
-                            line = new_line
-                            break
-                    else:
-                        verb(f"= {line}", add=-2)
+                    line = check_line(line, mapping)
                 if write_mode:
                     newFile.write(line + "\n")
         if write_mode and changed:
