@@ -86,7 +86,7 @@ def url_to_regex(url, multi_mapping=multi_mapping):
         if not is_multi_mapped:
             url_pattern = re.escape(url)
         # Prefix protocol again
-        return r"https?://" + url_pattern
+        return r"https?://" + url_pattern + r"/?"
     else:
         return re.escape(url)
 
