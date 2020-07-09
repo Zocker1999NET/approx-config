@@ -21,11 +21,11 @@ if you want to avoid use GitHub.
 - Verboses changes if requested
 - Can rewrite sources files if run as `root`
 - Does backup old sources files for easy restoring
+- Supports mirror lists for allowing fallback to direct connection (see [`man apt-transport-mirror`](https://manpages.debian.org/buster/apt/apt-transport-mirror.1.en.html))
 
 ### ToDo
 
 - Support https for approx
-- Implement '--mirror' mode
 
 ## Usage
 
@@ -51,7 +51,12 @@ If you want to approve these changes, run as `root`:
 ```
 
 Now your system will use the approx cache.
-The old entries are commented out.
+The old entries can be found in the backup files.
+
+### Mirror Mode
+
+To use mirror mode, follow the same approach as above,
+but append the flag `-m` or `--mirror-mode` to the arguments.
 
 ## Contribute
 
