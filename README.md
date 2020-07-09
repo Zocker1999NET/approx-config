@@ -22,6 +22,7 @@ if you want to avoid use GitHub.
 - Can rewrite sources files if run as `root`
 - Does backup old sources files for easy restoring
 - Supports mirror lists for allowing fallback to direct connection (see [`man apt-transport-mirror`](https://manpages.debian.org/buster/apt/apt-transport-mirror.1.en.html))
+  (**WARNING**: This feature is not considered stable, please use with caution)
 
 ### ToDo
 
