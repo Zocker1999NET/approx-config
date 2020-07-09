@@ -119,7 +119,7 @@ def checkFile(source_file, mapping):
                             old_url = old_match.group(0)
                             verb(f"{line}")
                             if mirror_mode:
-                                mirror_file = mirror_path / (hashlib.sha256(old_pattern.pattern) + ".lst")
+                                mirror_file = mirror_path / (hashlib.sha256(old_pattern.pattern.encode('utf-8')).hexdigest() + ".lst")
                                 new_line = old_pattern.sub('mirror+file:' + str(mirror_file.resolve()), line)
                                 if write_mode:
                                     if not mirror_path.exists():
