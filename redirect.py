@@ -120,7 +120,7 @@ def check_line(line, mapping):
                     if not mirror_path.exists():
                         mirror_path.mkdir()
                     if not mirror_file.exists():
-                        mirror_file.write_text(f"{new_url}{old_suffix} priority:1\n{old_url} priority:9\n")
+                        mirror_file.write_text(f"{new_url}{old_suffix}\tpriority:1\n{old_url}\tpriority:9\n")
                 new_line = lineUrlRegex.sub('mirror+file:' + str(mirror_file.resolve()), line)
             else:
                 new_line = old_pattern.sub(new_url, line)
